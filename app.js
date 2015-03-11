@@ -19,6 +19,7 @@ var app = express();
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+app.set('images',__dirname + '/public/images');
 app.use(flash());
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
@@ -29,22 +30,50 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+//session
 var session = require('express-session');
+/*
+//mongo session
 var MongoStore = require('connect-mongo')(session);
-
-
 app.use(session({
-    secret: settings.cookieSecret,
+    secret: settings.mongodb.cookieSecret,
     resave: true,
     saveUninitialized: true,
     autoRemove: 'native', // Default
-    key: settings.db,//cookie name
+    key: settings.mongodb.db,//cookie name
     cookie: {maxAge: 1000 * 60 * 60 * 24 * 30},//30 days
     store: new MongoStore({
-        db: settings.db,
-        host: settings.host,
-        port: settings.port
+        db: settings.mongodb.db,
+        host: settings.mongodb.host,
+        port: settings.mongodb.port
     })
+}));
+*/
+//redis session
+var RedisStore = require('connect-redis')(session);
+app.use(session({
+    secret: settings.redisdb.cookieSecret,
+    resave: true,
+    saveUninitialized: true,
+    autoRemove: 'native', // Default
+    key: settings.redisdb.db,//cookie name
+    cookie: {maxAge: 1000 * 60 * 60 * 24 * 30},//30 days
+    store: new RedisStore({
+        host: settings.redisdb.host,
+        port: settings.redisdb.port,
+        ttl: 1800 // 过期时间
+    })
+
+}));
+
+
+//upload
+var multer  = require('multer');
+app.use(multer({
+    dest: app.get('images'),
+    rename: function (fieldname, filename) {
+        return filename;
+    }
 }));
 
 routes(app);
