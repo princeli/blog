@@ -9,7 +9,9 @@ var routes = require('./routes/index');
 var settings = require('./settings');
 var flash = require('connect-flash');
 
-
+var fs = require('fs');
+var accessLog = fs.createWriteStream('access.log', {flags: 'a'});
+var errorLog = fs.createWriteStream('error.log', {flags: 'a'});
 
 
 
@@ -25,10 +27,16 @@ app.use(flash());
 //app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(favicon(__dirname + '/public/images/favicon.ico'));
 app.use(logger('dev'));
+app.use(logger({stream: accessLog}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(function (err, req, res, next) {
+    var meta = '[' + new Date() + '] ' + req.url + '\n';
+    errorLog.write(meta + err.stack + '\n');
+    next();
+});
 
 //session
 var session = require('express-session');

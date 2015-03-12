@@ -255,14 +255,14 @@ module.exports = function(app) {
         });
     });
 
-    app.get('/u/:name/:day/:title', function (req, res) {
-        Post.getOne(req.params.name, req.params.day, req.params.title, function (err, post) {
+    app.get('/p/:_id', function (req, res) {
+        Post.getOne(req.params._id, function (err, post) {
             if (err) {
                 req.flash('error', err);
                 return res.redirect('/');
             }
             res.render('article', {
-                title: req.params.title,
+                title: post.title,
                 post: post,
                 user: req.session.user,
                 success: req.flash('success').toString(),
@@ -297,10 +297,10 @@ module.exports = function(app) {
         });
     });
 
-    app.get('/edit/:name/:day/:title', checkLogin);
-    app.get('/edit/:name/:day/:title', function (req, res) {
+    app.get('/edit/:_id', checkLogin);
+    app.get('/edit/:_id', function (req, res) {
         var currentUser = req.session.user;
-        Post.edit(currentUser.name, req.params.day, req.params.title, function (err, post) {
+        Post.edit(req.params._id, function (err, post) {
             if (err) {
                 req.flash('error', err);
                 return res.redirect('back');
@@ -315,11 +315,12 @@ module.exports = function(app) {
         });
     });
 
-    app.post('/edit/:name/:day/:title', checkLogin);
-    app.post('/edit/:name/:day/:title', function (req, res) {
+    app.post('/edit/:_id', checkLogin);
+    app.post('/edit/:_id', function (req, res) {
         var currentUser = req.session.user;
-        Post.update(currentUser.name, req.params.day, req.params.title, req.body.post, function (err) {
-            var url = encodeURI('/u/' + req.params.name + '/' + req.params.day + '/' + req.params.title);
+        Post.update( req.params._id, req.body.post, function (err) {
+            var url = encodeURI('/p/' + req.params._id);
+            console.info(url);
             if (err) {
                 req.flash('error', err);
                 return res.redirect(url);//出错！返回文章页
