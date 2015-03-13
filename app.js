@@ -69,7 +69,8 @@ app.use(session({
     store: new RedisStore({
         host: settings.redisdb.host,
         port: settings.redisdb.port,
-        ttl: 1800 // 过期时间
+        pass:settings.redisdb.pass,
+        ttl: settings.redisdb.ttl // 过期时间
     })
 
 }));
